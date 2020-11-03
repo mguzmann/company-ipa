@@ -3,7 +3,7 @@ company-ipa
 
 ![screenshot](screenshot.png)
 
-![screencast](screecast.gif)
+![screencast](screencast.gif)
 
 This package adds ipa completion for company.
 
