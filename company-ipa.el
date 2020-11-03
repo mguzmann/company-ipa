@@ -207,11 +207,7 @@
 ;;; INTERNALS
 
 (defun company-ipa--make-candidates (alist prefix)
-  "Build a list of math symbols ready to be used in a company backend.
-ALIST is one of the defined alist in package `math-symbol-lists'.
-PREFIX is a string to be prefixed to each symbol.  Return a list
-of LaTeX symbols with text property :symbol being the
-corresponding unicode symbol."
+  "Build a list of math symbols ready to be used in a company backend."
   (delq nil
         (mapcar
          (lambda (el)
@@ -226,9 +222,7 @@ corresponding unicode symbol."
   (company-ipa--make-candidates ipa-symbol-list-basic company-ipa-symbol-prefix))
 
 (defun company-ipa--prefix (regexp)
-  "Response to company prefix command.
-REGEXP is the regexp, ALLOW-FACES and DISALLOW-FACES are list of
-various faces to allow or disallow completion on."
+  "Response to company prefix command."
   (save-excursion
     (let* ((ppss (syntax-ppss))
            (min-point (if (nth 3 ppss)
@@ -254,10 +248,8 @@ various faces to allow or disallow completion on."
 ;;; BACKENDS
 
 ;;;###autoload
-(defun company-math--prefix (regexp)
-  "Response to company prefix command.
-REGEXP is the regexp, ALLOW-FACES and DISALLOW-FACES are list of
-various faces to allow or disallow completion on."
+(defun company-ipa--prefix (regexp)
+  "Response to company prefix command."
   (save-excursion
     (let* ((ppss (syntax-ppss))
            (min-point (if (nth 3 ppss)
@@ -271,7 +263,7 @@ various faces to allow or disallow completion on."
   (interactive (list 'interactive))
   (cl-case command
     (interactive (company-begin-backend 'company-ipa-symbols-unicode))
-    (prefix (company-math--prefix company-ipa--unicode-prefix-regexp))
+    (prefix (company-ipa--prefix company-ipa--unicode-prefix-regexp))
     (annotation (concat " " (get-text-property 0 :displ arg)))
     (candidates (delq nil
 		      (mapcar (lambda (candidate)
