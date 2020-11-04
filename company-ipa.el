@@ -1,6 +1,6 @@
 ;;; company-ipa.el --- ipa backend for company -*- lexical-binding: t -*-
 
-;; Copyright (C) 2020
+;; Copyright (C) 2020 Free Software Foundation, Inc.
 
 ;; Author: Matías Guzmán Naranjo <mguzmann89@gmail.com>
 ;; Keywords: convenience, company, ipa
@@ -30,9 +30,9 @@
 ;; Usage
 ;; =====
 
-;; To install, either clone this package directly
+;; To install clone this package directly and load it (load-file "PATH/company-ipa.el")
 
-;; To activate: (add-to-list 'company-backends 'company-ipa)
+;; To activate: (add-to-list 'company-backends 'company-ipa-symbols-unicode)
 
 ;; To use: type '¬' and you should get completions
 
@@ -51,7 +51,7 @@
 (require 'cl-lib)
 
 (defgroup company-ipa nil
-  "Completion back-ends for math symbols Unicode symbols and LaTeX tags."
+  "Completion back-ends for ipa symbols Unicode."
   :group 'company
   :prefix "company-ipa-")
 
@@ -248,16 +248,6 @@
 ;;; BACKENDS
 
 ;;;###autoload
-(defun company-ipa--prefix (regexp)
-  "Response to company prefix command."
-  (save-excursion
-    (let* ((ppss (syntax-ppss))
-           (min-point (if (nth 3 ppss)
-                          (max (nth 8 ppss) (point-at-bol))
-                        (point-at-bol))))
-      (when (looking-back regexp min-point 'greedy)
-        (match-string 0)))))
-
 (defun company-ipa-symbols-unicode (command &optional arg &rest _ignored)
   "Company backend for insertion of Unicode mathematical symbols."
   (interactive (list 'interactive))
