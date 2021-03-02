@@ -1,12 +1,12 @@
-;;; company-ipa.el --- ipa backend for company -*- lexical-binding: t -*-
+;;; company-ipa.el --- IPA backend for company -*- lexical-binding: t -*-
 
-;; Copyright (C) 2020 Free Software Foundation, Inc.
+;; Copyright (C) Matías Guzmán Naranjo.
 
 ;; Author: Matías Guzmán Naranjo <mguzmann89@gmail.com>
-;; Keywords: convenience, company, ipa
+;; Keywords: convenience, company, IPA
 ;; Version: 20201003
 ;; URL: https://github.com/mguzmann/company-ipa
-;; Package-Requires: ((emacs "24") (company "0.8.12"))
+;; Package-Requires: ((emacs "24.3") (company "0.8.12"))
 
 ;;; License:
 
@@ -21,11 +21,11 @@
 ;; GNU General Public License for more details.
 
 ;; You should have received a copy of the GNU General Public License
-;; along with this program. If not, see <http://www.gnu.org/licenses/>.
+;; along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 ;;; Commentary:
 
-;; This package adds an easy way of inserting ipa into a document
+;; This package adds an easy way of inserting IPA (International Phonetic Alphabet) into a document
 
 ;; Usage
 ;; =====
@@ -34,15 +34,10 @@
 
 ;; To activate: (add-to-list 'company-backends 'company-ipa-symbols-unicode)
 
-;; To use: type '¬' and you should get completions
+;; To use: type '~pp' and you should get completions
 
 ;; To change the prefix, execute:
-;; (setq company-ipa-symbol-prefix "·")
-;; before loading this file
-
-;; If you want to change the list of symbols you should either do it here
-;; or (setq ipa-symbol-list-basic '((...)))
-;; before calling this file
+;; (setq company-ipa-set-trigger-prefix "¬")
 
 ;; For best performance you should use this with company-flx:
 ;; (company-flx-mode +1)
@@ -50,12 +45,14 @@
 (require 'company)
 (require 'cl-lib)
 
+;;; Code:
+
 (defgroup company-ipa nil
-  "Completion back-ends for ipa symbols Unicode."
+  "Completion back-ends for IPA symbols Unicode."
   :group 'company
   :prefix "company-ipa-")
 
-(defvar ipa-symbol-list-basic
+(defvar company-ipa-symbol-list-basic
   '(("vowel" " a [vowel] open back unrounded" 593 "ɑ")
     ("vowel" " a [vowel] open-mid schwa" 592 "ɐ")
     ("vowel" " a [vowel] open back rounded" 594 "ɒ")
@@ -187,27 +184,23 @@
     ("diac" " [sup] low tone" 768 "è")
     ("diac" " [sup] extra low tone" 783  "ȅ")
     ("diac" " [sub] tie bar below" 860  "x͜x")
-    ("diac" " [sup] tie bar above " 865  "x͡x")    
-    )
+    ("diac" " [sup] tie bar above " 865  "x͡x"))
   "List of basic IPA symbols.")
 
-(defcustom company-ipa-symbol-prefix "¬"
-  "Prefix for ipa insertion."
+(defcustom company-ipa-symbol-prefix "~pp"
+  "Prefix for IPA insertion."
   :group 'company-ipa
   :type 'string)
 
-(setq company-ipa--latex-prefix-regexp
-      (concat (regexp-quote company-ipa-symbol-prefix)
-              "[^ \t\n]+"))
-
-(setq company-ipa--unicode-prefix-regexp
-      (concat (regexp-quote company-ipa-symbol-prefix)
-              "[^ \t\n]*"))
+(defvar company-ipa--unicode-prefix-regexp
+  (concat (regexp-quote company-ipa-symbol-prefix)
+          "[^ \t\n]*"))
 
 ;;; INTERNALS
 
-(defun company-ipa--make-candidates (alist prefix)
-  "Build a list of math symbols ready to be used in a company backend."
+(defun company-ipa--make-candidates (alist)
+  "Build a list of IPA symbols ready to be used in a company backend.
+Argument ALIST an alist of IPA symboles."
   (delq nil
         (mapcar
          (lambda (el)
@@ -219,10 +212,11 @@
          alist)))
 
 (defconst company-ipa--symbols
-  (company-ipa--make-candidates ipa-symbol-list-basic company-ipa-symbol-prefix))
+  (company-ipa--make-candidates company-ipa-symbol-list-basic))
 
 (defun company-ipa--prefix (regexp)
-  "Response to company prefix command."
+  "Response to company prefix command.
+Argument REGEXP REGEXP for matching prefix."
   (save-excursion
     (let* ((ppss (syntax-ppss))
            (min-point (if (nth 3 ppss)
@@ -245,11 +239,22 @@
       (delete-region (point) pos)
       (insert symbol))))
 
+(defun company-ipa-set-trigger-prefix (prefix)
+  "Change the trigger prefix for company IPA."
+  (setq company-ipa-symbol-prefix prefix)
+  (setq company-ipa--unicode-prefix-regexp
+	(concat (regexp-quote company-ipa-symbol-prefix)
+		"[^ \t\n]*"))
+  (setq company-ipa--symbols
+	(company-ipa--make-candidates company-ipa-symbol-list-basic)))
+
 ;;; BACKENDS
 
 ;;;###autoload
 (defun company-ipa-symbols-unicode (command &optional arg &rest _ignored)
-  "Company backend for insertion of Unicode mathematical symbols."
+  "Company backend for insertion of Unicode IPA symbols.
+Argument COMMAND Matching command.
+Optional argument ARG ARG for company."
   (interactive (list 'interactive))
   (cl-case command
     (interactive (company-begin-backend 'company-ipa-symbols-unicode))
@@ -261,8 +266,7 @@
 				  (concat candidate " ")))
 			      company-ipa--symbols)))
     (post-completion (company-ipa--substitute-unicode
-		      (get-text-property 0 :symbol arg)))
-    ))
+		      (get-text-property 0 :symbol arg)))))
 
 (provide 'company-ipa)
 ;;; company-ipa.el ends here
